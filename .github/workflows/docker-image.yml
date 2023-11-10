@@ -32,14 +32,16 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }} # Este password es el token que cree en mi cuenta de docker
       run: | # Este simbolo | es necesario para poner varios comandos uno debajo el otro
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-        echo "New version: $NEW_VERSION !!!!!!!!!!!"
         
     - name: Build Docker Image
       env:
         NEW_VERSION: ${{ steps.version.outputs.version }} # En esta nueva variable de entorno busco en los "steps" el que tiene como referencia el id "version" y dentro de este step busco el "output" llamado "version" que es algo propio de la accion PaulHatch/semantic-version@v4.0.3 que estamos usando en este step
       run: |
+        docker buildx ls
         docker buildx build --platform linux/amd64,linux/arm64 -t jonyplo/docker-graphql:$NEW_VERSION .
         docker buildx build --platform linux/amd64,linux/arm64 -t jonyplo/docker-graphql:latest .
+
+      # docker buildx create --name mybuilder --bootstrap --use
 
     - name: Push Docker Image
       env:
