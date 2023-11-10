@@ -19,7 +19,7 @@ jobs:
         fetch-depth: 0
 
     - name: Git Semantic Version
-      uses: PaulHatch/semantic-version@v4.0.3
+      uses: PaulHatch/semantic-version@v4.0.3 # PaulHatch/semantic-version@v4.0.3 es una accion de un tercero que estamos usando, y nos permite poder automatizar el versionamiento de nuestra aplicacion
       with:
         major_pattern: "major:"
         minor_pattern: "feat:"
@@ -30,20 +30,23 @@ jobs:
       env: 
         DOCKER_USER: ${{ secrets.DOCKER_USER }} # Este es mi usuario de docker que es jonyplo
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }} # Este password es el token que cree en mi cuenta de docker
-        NEW_VERSION: ${{ steps.version.outputs.version }} # En esta nueva variable de entorno busco en los "steps" el que tiene como referencia el id "version" y dentro de este step busco el "output" llamado "version" que es algo propio de la accion PaulHatch/semantic-version@v4.0.3 que estamos usando en este paso
-      run: |
+      run: | # Este simbolo | es necesario para poner varios comandos uno debajo el otro
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
         echo "New version: $NEW_VERSION !!!!!!!!!!!"
         
-    # - name: Build Docker Image
-    #   run: |
-    #     docker build -t jonyplo/docker-graphql:0.0.2 .
-    #     docker build -t jonyplo/docker-graphql:latest .
+    - name: Build Docker Image
+      env:
+        NEW_VERSION: ${{ steps.version.outputs.version }} # En esta nueva variable de entorno busco en los "steps" el que tiene como referencia el id "version" y dentro de este step busco el "output" llamado "version" que es algo propio de la accion PaulHatch/semantic-version@v4.0.3 que estamos usando en este step
+      run: |
+        docker build -t jonyplo/docker-graphql:$NEW_VERSION .
+        docker build -t jonyplo/docker-graphql:latest .
 
-    # - name: Push Docker Image
-    #   run: |
-    #     docker push jonyplo/docker-graphql:0.0.2
-    #     docker push jonyplo/docker-graphql:latest
+    - name: Push Docker Image
+      env:
+        NEW_VERSION: ${{ steps.version.outputs.version }}
+      run: |
+        docker push jonyplo/docker-graphql:$NEW_VERSION
+        docker push jonyplo/docker-graphql:latest
         
     # - name: Build the Docker image
     #   run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
