@@ -38,12 +38,13 @@ jobs:
         NEW_VERSION: ${{ steps.version.outputs.version }} # En esta nueva variable de entorno busco en los "steps" el que tiene como referencia el id "version" y dentro de este step busco el "output" llamado "version" que es algo propio de la accion PaulHatch/semantic-version@v4.0.3 que estamos usando en este step
       run: |
         docker buildx create --name mybuilder --bootstrap --use
-        docker buildx build --platform linux/amd64,linux/arm64 -t jonyplo/docker-graphql:$NEW_VERSION .
-        docker buildx build --platform linux/amd64,linux/arm64 -t jonyplo/docker-graphql:latest .
+        docker buildx build --platform linux/amd64,linux/arm64 -t jonyplo/docker-graphql:$NEW_VERSION --push .
+        docker buildx build --platform linux/amd64,linux/arm64 -t jonyplo/docker-graphql:latest --push .
 
-    - name: Push Docker Image
-      env:
-        NEW_VERSION: ${{ steps.version.outputs.version }}
-      run: |
-        docker push jonyplo/docker-graphql:$NEW_VERSION
-        docker push jonyplo/docker-graphql:latest
+# Usamos este ultimo step si en el step anterior solo creamos la imagen sin buildx
+    # - name: Push Docker Image
+    #   env:
+    #     NEW_VERSION: ${{ steps.version.outputs.version }}
+    #   run: |
+    #     docker push jonyplo/docker-graphql:$NEW_VERSION
+    #     docker push jonyplo/docker-graphql:latest
